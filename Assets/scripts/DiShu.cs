@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 public class DiShu : MonoBehaviour
 {
+
+
     public float lifeTime;
     public float lifeTimer;
     public UnityEvent OnDestroy;
@@ -31,14 +33,15 @@ public class DiShu : MonoBehaviour
     {
         OnDestroy.Invoke();
 
+        //加分
         Manager.Instance.HitDiShu();
-        Manager.Instance.UpdateScore();
+        //删除实体对象
         Destroy(gameObject);
     }
     public void DisAppear()
     {
         OnDestroy.Invoke();
-
+        //删除实体对象
         Destroy(gameObject);
     }
 }
