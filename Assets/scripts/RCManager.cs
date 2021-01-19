@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class RCManager : MonoBehaviour
 {
@@ -59,6 +60,12 @@ public class RCManager : MonoBehaviour
         }
 
         cube.name = cubePrefabs[index].name;
+
+        GameObject temp = GameObject.Find("/Canvas/Left");
+        Button button = temp.GetComponent<Button>();
+        button.onClick.AddListener(cube.GetComponent<CubeControlller>().MoveLeft);
+
+        ///加载cube事件
         UnityEvent eventTemp = cube.GetComponent<CubeControlller>().OnThisDone;
         eventTemp.AddListener(() => { AddToCubes(cube); });
         eventTemp.AddListener(CreatCube);
@@ -153,6 +160,9 @@ public class RCManager : MonoBehaviour
 
     }
 
-
+    public void Test1()
+    {
+        Debug.Log("Buttom");
+    }
 
 }

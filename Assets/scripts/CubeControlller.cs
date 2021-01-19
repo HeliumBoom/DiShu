@@ -55,27 +55,13 @@ public class CubeControlller : MonoBehaviour
         //左移
         if (Input.GetKeyDown(KeyCode.A))
         {
-            transform.position += new Vector3(-1, 0, 0);
-            bool isCrash;
-
-            //是否出界
-            if (!IsIn(out isCrash) || isCrash)
-            {
-                transform.position += new Vector3(1, 0, 0);
-            }
+            MoveLeft();
         }
 
         //右移
         if (Input.GetKeyDown(KeyCode.D))
         {
-            transform.position += new Vector3(1, 0, 0);
-            bool isCrash;
-
-            //是否出界
-            if (!IsIn(out isCrash) || isCrash)
-            {
-                transform.position += new Vector3(-1, 0, 0);
-            }
+            MoveRight();
         }
 
         //旋转
@@ -95,7 +81,30 @@ public class CubeControlller : MonoBehaviour
             {
                 if (!isIn)
                 {
+                    //先偏移
                     transform.position -= new Vector3(deviation, 0, 0);
+
+                    bool afterCrash = false;
+                    //偏移之后可能也有挡住的
+                    for (int i = 0; i < gameObject.transform.childCount; i++)
+                    {
+                        Transform temp = transform.GetChild(i);
+
+                        int x = Mathf.RoundToInt(temp.position.x);
+                        int y = Mathf.RoundToInt(temp.position.y);
+
+                        if (y < 19 && x > 0 && x < RCManager.Instance.Cubes.GetLength(0) && RCManager.Instance.Cubes[x, y] != null)
+                        {
+                            afterCrash = true;
+                        }
+                    }
+
+                    //偏移之后发生碰撞
+                    if (afterCrash)
+                    {
+                        //移回去
+                        transform.position += new Vector3(deviation, 0, 0);
+                    }
                 }
             }
         }
@@ -114,6 +123,29 @@ public class CubeControlller : MonoBehaviour
         else
         {
             downTimer = 0;
+        }
+    }
+
+    public void MoveLeft()
+    {
+        transform.position += new Vector3(-1, 0, 0);
+        bool isCrash;
+
+        //是否出界
+        if (!IsIn(out isCrash) || isCrash)
+        {
+            transform.position += new Vector3(1, 0, 0);
+        }
+    }
+    public void MoveRight()
+    {
+        transform.position += new Vector3(1, 0, 0);
+        bool isCrash;
+
+        //是否出界
+        if (!IsIn(out isCrash) || isCrash)
+        {
+            transform.position += new Vector3(-1, 0, 0);
         }
     }
 
