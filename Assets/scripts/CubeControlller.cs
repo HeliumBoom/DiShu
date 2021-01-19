@@ -1,20 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CubeControlller : MonoBehaviour
 {
-    float moveTimer;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public float moveTimer;
+    public UnityEvent OnThisDone;
 
     // Update is called once per frame
     void Update()
     {
+        //按键检测
+        MonitorKey();
+
         //自己下落
         moveTimer += Time.deltaTime;
         if (moveTimer > 0.8f)
@@ -22,9 +21,6 @@ public class CubeControlller : MonoBehaviour
             Move();
             moveTimer = 0;
         }
-
-        //按键检测
-        MonitorKey();
     }
 
     /// <summary>
@@ -33,9 +29,18 @@ public class CubeControlller : MonoBehaviour
     void Move()
     {
         transform.position += new Vector3(0, -1, 0);
-        if(!IsIn())
+
+        bool isCrrsh;
+        bool isIn = IsIn(out isCrrsh);
+
+        if (isCrrsh || !isIn)
         {
+            //向下运动发生出界或者碰撞
             transform.position += new Vector3(0, 1, 0);
+
+            OnThisDone.Invoke();
+
+            Destroy(gameObject);
         }
     }
 
@@ -44,9 +49,9 @@ public class CubeControlller : MonoBehaviour
     /// </summary>
     void MonitorKey()
     {
+        //左移
         if (Input.GetKeyDown(KeyCode.A))
         {
-            //左移
             transform.position += new Vector3(-1, 0, 0);
 
             //是否出界
@@ -55,9 +60,10 @@ public class CubeControlller : MonoBehaviour
                 transform.position += new Vector3(1, 0, 0);
             }
         }
+
+        //右移
         if (Input.GetKeyDown(KeyCode.D))
         {
-            //右移
             transform.position += new Vector3(1, 0, 0);
             //是否出界
             if (!IsIn())
@@ -65,14 +71,89 @@ public class CubeControlller : MonoBehaviour
                 transform.position += new Vector3(-1, 0, 0);
             }
         }
+
+        //旋转
         if (Input.GetKeyDown(KeyCode.W))
         {
-            //旋转
+            transform.Rotate(new Vector3(0, 0, 90));
+
+            int deviation;
+            bool isCrash;
+            bool isIn = IsIn(out deviation, out isCrash);
+
+            if (isCrash)
+            {
+                transform.Rotate(new Vector3(0, 0, -90));
+            }
+            else
+            {
+                if (!isIn)
+                {
+                    transform.position -= new Vector3(deviation, 0, 0);
+                }
+            }
+        }
+
+        //快速向下
+        if (Input.GetKey(KeyCode.S))
+        {
+            Move();
         }
     }
 
     /// <summary>
-    /// 出界判断
+    /// 左右下出界判断
+    /// </summary>
+    /// <param name="deviation"></param>
+    /// <param name="isCrash"></param>
+    /// <returns></returns>
+    bool IsIn(out int deviation, out bool isCrash)
+    {
+        bool isIn = true;
+        deviation = 0;
+        isCrash = false;
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform temp = transform.GetChild(i);
+
+            int x = Mathf.RoundToInt(temp.position.x);
+            int y = Mathf.RoundToInt(temp.position.y);
+
+            temp.position = new Vector3(x, y, 0);
+
+            if (y < 19 && RCManager.Instance.Cubes[x, y] != null)
+            {
+                isCrash = true;
+            }
+
+            //Debug.Log("Pos:" + pos.x + "  " + pos.y + "  " + pos.z);
+            //Debug.Log("temp:" + temp.position.x + "  " + temp.position.y + "  " + temp.position.z);
+
+            if (x < 1)
+            {
+                deviation = (Mathf.Abs(x - 1) > deviation) ? (int)x - 1 : deviation;
+
+                isIn = false;
+            }
+            else if(x > 10)
+            {
+                deviation = (Mathf.Abs(x - 1) > deviation) ? (int)x - 10 : deviation;
+
+                isIn = false;
+            }
+            else if (y < 1)//算碰撞
+            {
+                isCrash = true;
+                isIn = false;
+            }
+        }
+
+        return isIn;
+    }
+
+    /// <summary>
+    /// 左右下出界判断
     /// </summary>
     /// <returns>true表示没出界 false表示出界</returns>
     bool IsIn()
@@ -80,13 +161,63 @@ public class CubeControlller : MonoBehaviour
         for (int i = 0; i < transform.childCount; i++)
         {
             Transform temp = transform.GetChild(i);
-            if (temp.position.x < 1 || temp.position.x > 10 || temp.position.y < 1)
+
+            Vector3 pos = new Vector3(Mathf.RoundToInt(temp.position.x), Mathf.RoundToInt(temp.position.y), 0);
+            temp.position = pos;
+            //Debug.Log("Pos:" + pos.x + "  " + pos.y + "  " + pos.z);
+            //Debug.Log("temp:" + temp.position.x + "  " + temp.position.y + "  " + temp.position.z);
+
+            if (pos.x < 1 || pos.x > 10 || pos.y < 1)
             {
                 return false;
             }
-            
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="isCrash"></param>
+    /// <returns></returns>
+    bool IsIn(out bool isCrash)
+    {
+        bool isIn = true;
+        isCrash = false;
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform temp = transform.GetChild(i);
+
+            int x = Mathf.RoundToInt(temp.position.x);
+            int y = Mathf.RoundToInt(temp.position.y);
+
+            temp.position = new Vector3(x, y, 0);
+
+            if (y < 19 && RCManager.Instance.Cubes[x, y] != null)
+            {
+                isCrash = true;
+            }
+
+            //Debug.Log("Pos:" + pos.x + "  " + pos.y + "  " + pos.z);
+            //Debug.Log("temp:" + temp.position.x + "  " + temp.position.y + "  " + temp.position.z);
+
+            if (x < 1)
+            {
+                isIn = false;
+            }
+            else if (x > 10)
+            {
+                isIn = false;
+            }
+            else if (y < 1)
+            {
+                isCrash = true;
+                isIn = false;
+            }
+        }
+
+        return isIn;
     }
 }
