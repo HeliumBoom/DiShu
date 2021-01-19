@@ -24,6 +24,8 @@ public class CubeControlller : MonoBehaviour
         }
     }
 
+
+
     /// <summary>
     /// 自己移动
     /// </summary>
@@ -54,9 +56,10 @@ public class CubeControlller : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             transform.position += new Vector3(-1, 0, 0);
+            bool isCrash;
 
             //是否出界
-            if (!IsIn())
+            if (!IsIn(out isCrash) || isCrash)
             {
                 transform.position += new Vector3(1, 0, 0);
             }
@@ -66,8 +69,10 @@ public class CubeControlller : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
         {
             transform.position += new Vector3(1, 0, 0);
+            bool isCrash;
+
             //是否出界
-            if (!IsIn())
+            if (!IsIn(out isCrash) || isCrash)
             {
                 transform.position += new Vector3(-1, 0, 0);
             }
