@@ -7,6 +7,7 @@ public class CubeControlller : MonoBehaviour
 {
     public float moveTimer;
     public UnityEvent OnThisDone;
+    float downTimer = 0;
 
     // Update is called once per frame
     void Update()
@@ -97,7 +98,17 @@ public class CubeControlller : MonoBehaviour
         //快速向下
         if (Input.GetKey(KeyCode.S))
         {
-            Move();
+            downTimer += Time.deltaTime;
+
+            if (downTimer > 0.1f)
+            {
+                Move();
+                downTimer = 0;
+            }
+        }
+        else
+        {
+            downTimer = 0;
         }
     }
 
@@ -122,7 +133,7 @@ public class CubeControlller : MonoBehaviour
 
             temp.position = new Vector3(x, y, 0);
 
-            if (y < 19 && RCManager.Instance.Cubes[x, y] != null)
+            if (y < 19 && x > 0 && x < RCManager.Instance.Cubes.GetLength(0) && RCManager.Instance.Cubes[x, y] != null)
             {
                 isCrash = true;
             }
@@ -195,7 +206,7 @@ public class CubeControlller : MonoBehaviour
 
             temp.position = new Vector3(x, y, 0);
 
-            if (y < 19 && RCManager.Instance.Cubes[x, y] != null)
+            if (y < 19 && x > 0 && x < RCManager.Instance.Cubes.GetLength(0) && RCManager.Instance.Cubes[x, y] != null)
             {
                 isCrash = true;
             }
