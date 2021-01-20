@@ -104,6 +104,8 @@ public class CubeControlller : MonoBehaviour
                     {
                         //移回去
                         transform.position += new Vector3(deviation, 0, 0);
+                        //转回去
+                        transform.Rotate(new Vector3(0, 0, -90));
                     }
                 }
             }
